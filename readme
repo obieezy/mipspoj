@@ -1,0 +1,43 @@
+.data
+id: .asciiz "@03142505"   # Replaced with my Howard ID
+
+.text
+main:
+    # Initialize variables
+    li $t0, 0       # Counter for loop
+    li $t1, 9       # Constant for modulo operation
+    li $t2, 7       # Constant for modulo operation
+    li $t3, 10      # Constant for adding to modulo operation
+
+    # Calculate N = ID % 7
+    la $t4, id      # Load address of ID
+    lb $t5, 0($t4)  # Load first character of ID
+    li $t6, 0x30    # ASCII value for '0'
+    sub $t5, $t5, $t6   # Convert character to integer
+    div $t5, $t2    # Divide ID by 7
+    mfhi $t7        # Remainder stored in $t7 (N)
+
+    # Calculate X = ID % 9 + 10
+    lb $t8, 0($t4)  # Reload first character of ID
+    sub $t8, $t8, $t6   # Convert character to integer
+    div $t8, $t1    # Divide ID by 9
+    mfhi $t9        # Remainder stored in $t9
+    addi $t9, $t9, 10  # Add 10 to the remainder (X)
+
+loop:
+    # Print the string starting from (m + N) % 9
+    move $a0, $t0       # Load counter to print current string
+    add $a0, $a0, $t7   # Add N to current counter
+    add $a0, $a0, $t0   # Add m to current counter
+    li $v0, 4           # System call code for print_string
+    la $a1, id          # Load address of the string
+    add $a1, $a1, $a0   # Adjust address to start from the desired character
+    syscall
+
+    # Check if all strings are printed
+    addi $t0, $t0, 1    # Increment counter
+    bne $t0, $t9, loop  # Repeat loop if not all strings are printed
+
+    # Exit program
+    li $v0, 10           # System call code for exit
+    syscall
